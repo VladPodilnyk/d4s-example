@@ -1,11 +1,12 @@
 package leaderboard.plugins
 
+import distage.config.ConfigModuleDef
 import distage.plugins.PluginDef
 import distage.{ModuleDef, TagKK}
 import izumi.distage.model.definition.StandardAxis.Repo
-import izumi.distage.roles.bundled.BundledRolesModule
 import leaderboard.LeaderboardServiceRole
-import leaderboard.dynamo.java.{AwsLadder, DynamoHelper}
+import leaderboard.config.{DynamoCfg, ProvisioningCfg}
+import leaderboard.dynamo.java.{AwsLadder, AwsProfiles, DynamoHelper}
 import leaderboard.http.HttpApi
 import leaderboard.repo.{Ladder, Profiles, Ranks}
 import org.http4s.dsl.Http4sDsl
@@ -17,15 +18,11 @@ object LeaderboardPlugin extends PluginDef {
   include(modules.api[IO])
   include(modules.repoDummy[IO])
   include(modules.repoProd[IO])
-  //include(modules.configs)
+  include(modules.configs)
 
   object modules {
     def roles[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
-      // The `leaderboard` app
       make[LeaderboardServiceRole[F]]
-
-      // Bundled roles: `help` & `configwriter`
-      include(BundledRolesModule[F[Throwable, ?]](version = "1.0.0-SNAPSHOT"))
     }
 
     def api[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
@@ -42,16 +39,20 @@ object LeaderboardPlugin extends PluginDef {
       make[Profiles[F]].fromResource[Profiles.Dummy[F]]
     }
 
-    def repoProd[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
+    def repoProd[F[+_, +_]: TagKK]: ConfigModuleDef = new ConfigModuleDef {
       tag(Repo.Prod)
-      make[DynamoDbClient].from(DynamoHelper.makeClient)
+
+      make[DynamoDbClient].from {
+        cfg: DynamoCfg =>
+          DynamoHelper.makeClient(cfg)
+      }
       make[Ladder[F]].from[AwsLadder[F]]
-      //make[Profiles[F]].fromResource[Profiles.Postgres[F]]
+      make[Profiles[F]].from[AwsProfiles[F]]
     }
 
-//    val configs: ConfigModuleDef = new ConfigModuleDef {
-//      makeConfig[PostgresCfg]("postgres")
-//      makeConfig[PostgresPortCfg]("postgres")
-//    }
+    val configs: ConfigModuleDef = new ConfigModuleDef {
+      makeConfig[DynamoCfg]("aws.dynamo")
+      makeConfig[ProvisioningCfg]("aws.dynamo.provisioning")
+    }
   }
 }

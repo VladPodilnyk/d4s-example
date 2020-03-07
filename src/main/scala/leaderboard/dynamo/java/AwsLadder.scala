@@ -13,21 +13,14 @@ import scala.jdk.CollectionConverters._
 final class AwsLadder[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient) extends Ladder[F] {
 
   override def getScores: F[QueryFailure, List[UserWithScore]] = {
-    val rq = ScanRequest
-      .builder()
-      .tableName(DynamoHelper.ladderTable)
-      .build()
-
-    F.syncBlocking(client.scan(rq).items().asScala.map(_.asScala))
+    F.syncBlocking(processPages)
       .leftMap(err => QueryFailure(err.getMessage, err))
       .map(_.iterator.map {
         item =>
           (item.get("userId"), item.get("score")) match {
             case (Some(id), Some(score)) => UserWithScore(UserId(UUID.fromString(id.s())), Score(score.n().toLong))
           }
-
       }.toList)
-
   }
 
   override def submitScore(userId: UserId, score: Score): F[QueryFailure, Unit] = {
@@ -42,19 +35,24 @@ final class AwsLadder[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient) extend
     F.syncBlocking(client.updateItem(rq)).leftMap(err => QueryFailure(err.getMessage, err)).void
   }
 
-  private[this] def processPages(rq: ScanRequest) = {
+  private[this] def processPages: List[Map[String, AttributeValue]] = {
     import scala.jdk.CollectionConverters._
 
     @scala.annotation.tailrec
     def loop(acc: List[Map[String, AttributeValue]], rq: ScanRequest): List[Map[String, AttributeValue]] = {
-      val rsp  = client.scan(rq)
-      val next = rsp.lastEvaluatedKey()
+      val rsp   = client.scan(rq)
+      val next  = rsp.lastEvaluatedKey()
+      val items = rsp.items().asScala.toList.map(_.asScala.toMap)
       if (!next.isEmpty) {
-        val items = rsp.items().asScala.toList.map(_.asScala.toMap)
         loop(items ++ acc, rq.toBuilder.exclusiveStartKey(next).build())
       } else
-        acc
+        items ++ acc
     }
+
+    val rq = ScanRequest
+      .builder()
+      .tableName(DynamoHelper.ladderTable)
+      .build()
 
     loop(List.empty, rq)
   }

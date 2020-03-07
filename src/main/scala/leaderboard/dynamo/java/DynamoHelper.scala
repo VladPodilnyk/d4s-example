@@ -2,40 +2,48 @@ package leaderboard.dynamo.java
 
 import java.net.URI
 
+import izumi.distage.model.definition.DIResource
 import izumi.functional.bio.{BIO, BlockingIO, F}
+import leaderboard.config.DynamoCfg
 import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.http.apache.ApacheSdkHttpService
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{AttributeDefinition, BillingMode, CreateTableRequest, CreateTableResponse, KeySchemaElement, KeyType, ProvisionedThroughput, ScalarAttributeType}
+import software.amazon.awssdk.services.dynamodb.model._
 
 import scala.util.chaining._
 
 object DynamoHelper {
   final val ladderTable   = "ladder-dynamo-table"
   final val profilesTable = "profiles-dynamo-table"
-  final val ranksTable    = "ranks-dynamo-table"
 
-  def makeClient: DynamoDbClient = {
+  def makeClient(cfg: DynamoCfg): DynamoDbClient = {
     DynamoDbClient
       .builder()
       .httpClientBuilder(new ApacheSdkHttpService().createHttpClientBuilder())
-      .pipe(_.endpointOverride(URI.create("http://localhost:8042")))
+      .pipe(_.endpointOverride(URI.create(cfg.uri)))
       .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("x", "x")))
-      .region(Region.US_EAST_1)
+      .region(Region.of(cfg.region))
       .build()
   }
 
-  def createTable[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient, tableName: String): F[Throwable, CreateTableResponse] = {
+  def tableCreator[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient, cfg: DynamoCfg) = {
+    for {
+      _ <- DIResource.liftF(createTable(client, cfg, ladderTable).catchSome { case _: ResourceInUseException   => F.unit })
+      _ <- DIResource.liftF(createTable(client, cfg, profilesTable).catchSome { case _: ResourceInUseException => F.unit })
+    } yield ()
+  }
+
+  private[java] def createTable[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient, cfg: DynamoCfg, tableName: String): F[Throwable, CreateTableResponse] = {
     val rq = CreateTableRequest
       .builder()
       .tableName(tableName)
-      .billingMode(BillingMode.PROVISIONED)
+      .billingMode(cfg.provisioning.mode)
       .keySchema(
         KeySchemaElement.builder().attributeName("userId").keyType(KeyType.HASH).build()
       )
       .attributeDefinitions(AttributeDefinition.builder().attributeName("userId").attributeType(ScalarAttributeType.S).build())
-      .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(10L).writeCapacityUnits(10L).build())
+      .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(cfg.provisioning.read).writeCapacityUnits(cfg.provisioning.write).build())
       .build()
 
     F.syncBlocking {

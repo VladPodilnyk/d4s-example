@@ -34,10 +34,11 @@ object HttpApi {
         Ok(ladder.getScores.map(_.asJson))
 
       case POST -> Root / "ladder" / UUIDVar(userId) / LongVar(score) =>
-        Ok(ladder.submitScore(UserId(userId), Score(score)) *> BIO.pure("OK"))
+        Ok(ladder.submitScore(UserId(userId), Score(score)))
 
       case GET -> Root / "profile" / UUIDVar(id) =>
-        Ok(ranks.getRank(UserId(id)).map(_.asJson))
+        //Ok(ranks.getRank(UserId(id)).map(_.asJson))
+        Ok(profiles.getProfile(UserId(id)).map(_.asJson))
 
       case request @ POST -> Root / "profile" / UUIDVar(userId) =>
         Ok(for {

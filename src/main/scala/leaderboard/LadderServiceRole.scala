@@ -8,6 +8,7 @@ import izumi.distage.roles.model.{RoleDescriptor, RoleService}
 import izumi.distage.roles.{RoleAppLauncher, RoleAppMain}
 import izumi.functional.bio.{BIO, BlockingIO}
 import izumi.fundamentals.platform.cli.model.raw.{RawEntrypointParams, RawRoleParams}
+import leaderboard.config.DynamoCfg
 import leaderboard.dynamo.java.DynamoHelper
 import leaderboard.effects.{ConcurrentThrowable, TTimer}
 import leaderboard.http.HttpApi
@@ -17,14 +18,12 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 
 final class LeaderboardServiceRole[F[+_, +_]: ConcurrentThrowable: TTimer: BIO: BlockingIO](
   dynamoClient: DynamoDbClient,
+  cfg: DynamoCfg,
   httpApi: HttpApi[F]
 ) extends RoleService[F[Throwable, ?]] {
   override def start(roleParameters: RawEntrypointParams, freeArgs: Vector[String]): DIResource.DIResourceBase[F[Throwable, ?], Unit] = {
-    //val dynamoClient = DynamoHelper.makeClient
-
     for {
-      //_ <- DIResource.liftF(DynamoHelper.createTable(dynamoClient, DynamoHelper.ladderTable))
-      //_ <- DIResource.liftF(DynamoHelper.createTable(dynamoClient, DynamoHelper.profilesTable))
+      _ <- DynamoHelper.tableCreator(dynamoClient, cfg)
       _ <- DIResource.fromCats {
         BlazeServerBuilder[F[Throwable, ?]]
           .withHttpApp(httpApi.routes.orNotFound)
