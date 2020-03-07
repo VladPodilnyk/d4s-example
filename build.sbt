@@ -9,6 +9,7 @@ val V = new {
   val zioCats         = "2.0.0.0-RC10"
   val kindProjector   = "0.11.0"
   val circeDerivation = "0.12.0-M7"
+  val awsJavaSdk2     = "2.7.36"
 }
 
 val Deps = new {
@@ -37,6 +38,10 @@ val Deps = new {
 
   val zio     = "dev.zio" %% "zio" % V.zio
   val zioCats = "dev.zio" %% "zio-interop-cats" % V.zioCats
+
+  val awsDynamo = "software.amazon.awssdk" % "dynamodb" % V.awsJavaSdk2 exclude ("log4j", "log4j")
+
+  val awsImplApache = "software.amazon.awssdk" % "apache-client" % V.awsJavaSdk2 exclude ("log4j", "log4j")
 }
 
 inThisBuild(
@@ -70,6 +75,8 @@ lazy val leaderboard = project
       Deps.doobieHikari,
       Deps.zio,
       Deps.zioCats,
+      Deps.awsDynamo,
+      Deps.awsImplApache
     ),
     addCompilerPlugin(Deps.kindProjector),
   )

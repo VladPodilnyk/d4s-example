@@ -1,0 +1,10 @@
+version: "3.5"
+
+services:
+  dynamo-services:
+    container_name: dynamo-services
+    image: amazon/dynamodb-local:latest
+    expose:
+      - 8042
+    ports:
+      - 8042:8000

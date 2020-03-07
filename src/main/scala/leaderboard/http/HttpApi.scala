@@ -30,11 +30,11 @@ object HttpApi {
     )
 
     private val httpRoutes: HttpRoutes[F[Throwable, ?]] = HttpRoutes.of[F[Throwable, ?]] {
-      case GET -> Root / "ladder " =>
+      case GET -> Root / "ladder" =>
         Ok(ladder.getScores.map(_.asJson))
 
       case POST -> Root / "ladder" / UUIDVar(userId) / LongVar(score) =>
-        Ok(ladder.submitScore(UserId(userId), Score(score)))
+        Ok(ladder.submitScore(UserId(userId), Score(score)) *> BIO.pure("OK"))
 
       case GET -> Root / "profile" / UUIDVar(id) =>
         Ok(ranks.getRank(UserId(id)).map(_.asJson))
