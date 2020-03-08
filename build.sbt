@@ -10,6 +10,8 @@ val V = new {
   val kindProjector   = "0.11.0"
   val circeDerivation = "0.12.0-M7"
   val awsJavaSdk2     = "2.7.36"
+  val scanamo         = "1.0.0-M12"
+
 }
 
 val Deps = new {
@@ -42,6 +44,8 @@ val Deps = new {
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % V.awsJavaSdk2 exclude ("log4j", "log4j")
 
   val awsImplApache = "software.amazon.awssdk" % "apache-client" % V.awsJavaSdk2 exclude ("log4j", "log4j")
+
+  val scanamo = "org.scanamo" %% "scanamo" % V.scanamo
 }
 
 inThisBuild(
@@ -76,7 +80,8 @@ lazy val leaderboard = project
       Deps.zio,
       Deps.zioCats,
       Deps.awsDynamo,
-      Deps.awsImplApache
+      Deps.awsImplApache,
+      Deps.scanamo
     ),
     addCompilerPlugin(Deps.kindProjector),
   )

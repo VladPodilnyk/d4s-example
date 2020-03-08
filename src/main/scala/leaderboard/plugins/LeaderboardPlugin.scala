@@ -1,14 +1,16 @@
 package leaderboard.plugins
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import distage.config.ConfigModuleDef
 import distage.plugins.PluginDef
 import distage.{ModuleDef, TagKK}
 import izumi.distage.model.definition.StandardAxis.Repo
-import leaderboard.LeaderboardServiceRole
 import leaderboard.config.{DynamoCfg, ProvisioningCfg}
 import leaderboard.dynamo.java.{AwsLadder, AwsProfiles, DynamoHelper}
+import leaderboard.dynamo.scanamo.{ScanamoLadder, ScanamoUtils}
 import leaderboard.http.HttpApi
 import leaderboard.repo.{Ladder, Profiles, Ranks}
+import leaderboard.{CustomAxis, LeaderboardServiceRole}
 import org.http4s.dsl.Http4sDsl
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import zio.IO
@@ -17,7 +19,9 @@ object LeaderboardPlugin extends PluginDef {
   include(modules.roles[IO])
   include(modules.api[IO])
   include(modules.repoDummy[IO])
-  include(modules.repoProd[IO])
+  include(modules.repoAmz[IO])
+  include(modules.repoScanamo[IO])
+  include(modules.clients)
   include(modules.configs)
 
   object modules {
@@ -33,21 +37,34 @@ object LeaderboardPlugin extends PluginDef {
     }
 
     def repoDummy[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
-      tag(Repo.Dummy)
+      tag(CustomAxis.Dummy)
 
       make[Ladder[F]].fromResource[Ladder.Dummy[F]]
       make[Profiles[F]].fromResource[Profiles.Dummy[F]]
     }
 
-    def repoProd[F[+_, +_]: TagKK]: ConfigModuleDef = new ConfigModuleDef {
-      tag(Repo.Prod)
+    def repoAmz[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
+      tag(CustomAxis.Amz)
+      make[Ladder[F]].from[AwsLadder[F]].named("aws-ladder")
+      make[Profiles[F]].from[AwsProfiles[F]].named("aws-profiles")
+    }
 
+    def repoScanamo[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
+      tag(CustomAxis.Scanamo)
+      make[Ladder[F]].from[ScanamoLadder[F]].named("scanamo-ladder")
+      make[Profiles[F]].from[AwsProfiles[F]].named("scanamo-profiles")
+    }
+
+    val clients: ModuleDef = new ModuleDef {
       make[DynamoDbClient].from {
         cfg: DynamoCfg =>
           DynamoHelper.makeClient(cfg)
       }
-      make[Ladder[F]].from[AwsLadder[F]]
-      make[Profiles[F]].from[AwsProfiles[F]]
+
+      make[AmazonDynamoDB].from {
+        cfg: DynamoCfg =>
+          ScanamoUtils.makeClient(cfg)
+      }
     }
 
     val configs: ConfigModuleDef = new ConfigModuleDef {

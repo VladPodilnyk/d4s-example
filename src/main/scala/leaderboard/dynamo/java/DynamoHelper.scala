@@ -27,11 +27,11 @@ object DynamoHelper {
       .build()
   }
 
-  def tableCreator[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient, cfg: DynamoCfg) = {
-    for {
-      _ <- DIResource.liftF(createTable(client, cfg, ladderTable).catchSome { case _: ResourceInUseException   => F.unit })
-      _ <- DIResource.liftF(createTable(client, cfg, profilesTable).catchSome { case _: ResourceInUseException => F.unit })
-    } yield ()
+  def tableSetUp[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient, cfg: DynamoCfg) = {
+    DIResource.liftF((for {
+      _ <- createTable(client, cfg, ladderTable)
+      _ <- createTable(client, cfg, profilesTable)
+    } yield ()).catchSome { case _: ResourceInUseException => F.unit })
   }
 
   private[java] def createTable[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient, cfg: DynamoCfg, tableName: String): F[Throwable, CreateTableResponse] = {
