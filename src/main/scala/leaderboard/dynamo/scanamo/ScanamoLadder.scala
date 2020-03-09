@@ -1,6 +1,8 @@
 package leaderboard.dynamo.scanamo
 
-import cats.implicits._
+import cats.instances.either._
+import cats.instances.list._
+import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import izumi.functional.bio.{BIO, F}
 import leaderboard.dynamo.scanamo.ScanamoUtils._
@@ -18,8 +20,8 @@ final class ScanamoLadder[F[+_, +_]: BIO](client: AmazonDynamoDB) extends Ladder
   }
 
   override def submitScore(userId: UserId, score: Score): F[QueryFailure, Unit] = {
-    F.pure(Scanamo(client).exec {
+    F.syncThrowable(Scanamo(client).exec {
       ladderTableDef.put(UserWithScore(userId, score))
-    })
+    }).leftMap(err => QueryFailure(err.toString, err))
   }
 }

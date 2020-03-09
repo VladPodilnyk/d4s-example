@@ -2,15 +2,15 @@ package leaderboard.plugins
 
 import java.util.concurrent.ThreadPoolExecutor
 
-import cats.effect.{Async, Blocker, Bracket, ConcurrentEffect, ContextShift, Timer}
+import cats.effect.{Async, Blocker, Bracket, ConcurrentEffect, ContextShift}
 import distage.Id
 import distage.plugins.PluginDef
 import izumi.distage.effect.modules.ZIODIEffectModule
-import leaderboard.effects.{ConcurrentThrowable, TTimer}
+import leaderboard.effects.{AsyncThrowable, ConcurrentThrowable, ContextShiftThrowable, TTimer}
 import logstage.LogBIO
-import zio.{IO, Runtime, Task}
 import zio.interop.catz._
 import zio.interop.catz.implicits._
+import zio.{IO, Runtime, Task}
 
 import scala.concurrent.ExecutionContext
 
@@ -19,6 +19,8 @@ object ZIOPlugin extends PluginDef {
 
   addImplicit[Bracket[Task, Throwable]]
   addImplicit[Async[Task]]
+  addImplicit[ContextShiftThrowable[IO]]
+  addImplicit[AsyncThrowable[IO]]
   addImplicit[ContextShift[Task]]
   make[TTimer[IO]].from {
     implicit zclock: zio.clock.Clock =>

@@ -1,7 +1,10 @@
 package leaderboard.dynamo.scanamo
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.alpakka.dynamodb.{DynamoClient, DynamoSettings}
 import com.amazonaws.ClientConfiguration
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials, DefaultAWSCredentialsProviderChain}
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.dynamodbv2.model._
 import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync, AmazonDynamoDBAsyncClient}
@@ -20,6 +23,20 @@ object ScanamoUtils {
 
   private[scanamo] val ladderTableDef   = Table[UserWithScore](ladderTable)
   private[scanamo] val profilesTableDef = Table[UserProfileWithId](profilesTable)
+
+  implicit val system       = ActorSystem("scanamo-alpakka")
+  implicit val materializer = ActorMaterializer.create(system)
+  implicit val executor     = system.dispatcher
+
+  def makeAlpakkaClient(cfg: DynamoCfg): DynamoClient = {
+    DynamoClient(
+      DynamoSettings(
+        region = cfg.region,
+        host   = cfg.uri.split(':').head.stripPrefix("http://"),
+      ).withPort(cfg.uri.split(':').last.toInt)
+        .withCredentialsProvider(new AWSStaticCredentialsProvider(new BasicAWSCredentials("x", "x")))
+    )
+  }
 
   def makeClient(cfg: DynamoCfg): AmazonDynamoDBAsync = {
     AmazonDynamoDBAsyncClient

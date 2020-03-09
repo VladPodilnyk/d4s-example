@@ -21,7 +21,13 @@ final class ScanamoProfiles[F[+_, +_]: BIO](client: AmazonDynamoDB) extends Prof
   }
 
   override def setProfile(userId: UserId, profile: UserProfile): F[QueryFailure, Unit] = {
-    Scanamo(client).exec(profilesTableDef.update("userId" -> userId.value.toString, set("name", profile.name) and set("description", profile.description))) match {
+    Scanamo(client).exec(
+      profilesTableDef
+        .update(
+          "userId" -> userId.value.toString,
+          set("name", profile.name) and set("description", profile.description)
+        )
+    ) match {
       case Left(err) => F.fail(QueryFailure(err.toString, new Throwable(err.toString)))
       case Right(_)  => F.unit
     }

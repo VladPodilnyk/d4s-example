@@ -11,6 +11,7 @@ val V = new {
   val circeDerivation = "0.12.0-M7"
   val awsJavaSdk2     = "2.7.36"
   val scanamo         = "1.0.0-M12"
+  val akka            = "1.1.2"
 
 }
 
@@ -45,7 +46,10 @@ val Deps = new {
 
   val awsImplApache = "software.amazon.awssdk" % "apache-client" % V.awsJavaSdk2 exclude ("log4j", "log4j")
 
-  val scanamo = "org.scanamo" %% "scanamo" % V.scanamo
+  val scanamo        = "org.scanamo" %% "scanamo" % V.scanamo
+  val scanamoAlpakka = "org.scanamo" %% "scanamo-alpakka" % V.scanamo
+
+  val akka = "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % V.akka
 }
 
 inThisBuild(
@@ -81,7 +85,9 @@ lazy val leaderboard = project
       Deps.zioCats,
       Deps.awsDynamo,
       Deps.awsImplApache,
-      Deps.scanamo
+      Deps.scanamo,
+      Deps.scanamoAlpakka,
+      Deps.akka
     ),
     addCompilerPlugin(Deps.kindProjector),
   )

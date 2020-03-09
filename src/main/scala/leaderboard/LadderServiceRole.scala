@@ -41,6 +41,8 @@ object MainProdAmz extends MainBase(Activation(CustomAxis -> CustomAxis.Amz))
 
 object MainProdScanamo extends MainBase(Activation(CustomAxis -> CustomAxis.Scanamo))
 
+object MainProdScanamoAlpakka extends MainBase(Activation(CustomAxis -> CustomAxis.Alpakka))
+
 object MainDummy extends MainBase(Activation(CustomAxis -> CustomAxis.Dummy))
 
 object LeaderboardServiceRole extends RoleDescriptor {

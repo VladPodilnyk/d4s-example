@@ -1,13 +1,13 @@
 package leaderboard.plugins
 
+import akka.stream.alpakka.dynamodb.DynamoClient
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import distage.config.ConfigModuleDef
 import distage.plugins.PluginDef
 import distage.{ModuleDef, TagKK}
-import izumi.distage.model.definition.StandardAxis.Repo
 import leaderboard.config.{DynamoCfg, ProvisioningCfg}
 import leaderboard.dynamo.java.{AwsLadder, AwsProfiles, DynamoHelper}
-import leaderboard.dynamo.scanamo.{ScanamoLadder, ScanamoUtils}
+import leaderboard.dynamo.scanamo.{AlpakkaLadder, AlpakkaProfiles, ScanamoLadder, ScanamoUtils}
 import leaderboard.http.HttpApi
 import leaderboard.repo.{Ladder, Profiles, Ranks}
 import leaderboard.{CustomAxis, LeaderboardServiceRole}
@@ -55,6 +55,12 @@ object LeaderboardPlugin extends PluginDef {
       make[Profiles[F]].from[AwsProfiles[F]].named("scanamo-profiles")
     }
 
+    def repoAlpakkaAndScanamo[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
+      tag(CustomAxis.Alpakka)
+      make[Ladder[F]].from[AlpakkaLadder[F]]
+      make[Profiles[F]].from[AlpakkaProfiles[F]]
+    }
+
     val clients: ModuleDef = new ModuleDef {
       make[DynamoDbClient].from {
         cfg: DynamoCfg =>
@@ -64,6 +70,11 @@ object LeaderboardPlugin extends PluginDef {
       make[AmazonDynamoDB].from {
         cfg: DynamoCfg =>
           ScanamoUtils.makeClient(cfg)
+      }
+
+      make[DynamoClient].from {
+        cfg: DynamoCfg =>
+          ScanamoUtils.makeAlpakkaClient(cfg)
       }
     }
 
