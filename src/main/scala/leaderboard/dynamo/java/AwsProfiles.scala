@@ -36,7 +36,7 @@ final class AwsProfiles[F[+_, +_]: BIO: BlockingIO](client: DynamoDbClient) exte
       .updateExpression(s"SET userName = :name, description = :descr")
       .expressionAttributeValues(
         Map(
-          ":name"  -> AttributeValue.builder().s(profile.name).build(),
+          ":name"  -> AttributeValue.builder().s(profile.userName).build(),
           ":descr" -> AttributeValue.builder().s(profile.description).build()
         ).asJava
       )

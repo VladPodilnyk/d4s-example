@@ -12,7 +12,7 @@ val V = new {
   val awsJavaSdk2     = "2.7.36"
   val scanamo         = "1.0.0-M12"
   val akka            = "1.1.2"
-
+  val d4s             = "1.0.0-SNAPSHOT"
 }
 
 val Deps = new {
@@ -50,6 +50,8 @@ val Deps = new {
   val scanamoAlpakka = "org.scanamo" %% "scanamo-alpakka" % V.scanamo
 
   val akka = "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % V.akka
+
+  val d4s = "net.playq" %% "dynamo" % V.d4s
 }
 
 inThisBuild(
@@ -63,6 +65,12 @@ lazy val leaderboard = project
   .in(file("."))
   .settings(
     name := "LeaderBoard",
+    scalacOptions in Compile += s"-Xmacro-settings:metricsDir=${(classDirectory in Compile).value}",
+    scalacOptions in Test += s"-Xmacro-settings:metricsDir=${(classDirectory in Compile).value}",
+    scalacOptions in Test += s"-Xmacro-settings:metricsDir=${(classDirectory in Test).value}",
+    scalacOptions in Compile += s"-Xmacro-settings:metricsRole=${(name in Compile).value};${(moduleName in Compile).value}",
+    scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Compile).value};${(moduleName in Compile).value}",
+    scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Test).value};${(moduleName in Test).value}",
     scalacOptions --= Seq("-Werror", "-Xfatal-warnings"),
     libraryDependencies ++= Seq(
       Deps.distageCore,
@@ -87,7 +95,8 @@ lazy val leaderboard = project
       Deps.awsImplApache,
       Deps.scanamo,
       Deps.scanamoAlpakka,
-      Deps.akka
+      Deps.akka,
+      Deps.d4s
     ),
     addCompilerPlugin(Deps.kindProjector),
   )

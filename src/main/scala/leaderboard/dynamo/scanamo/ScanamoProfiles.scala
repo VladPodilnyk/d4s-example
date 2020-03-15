@@ -25,7 +25,7 @@ final class ScanamoProfiles[F[+_, +_]: BIO](client: AmazonDynamoDB) extends Prof
       profilesTableDef
         .update(
           "userId" -> userId.value.toString,
-          set("name", profile.name) and set("description", profile.description)
+          set("name", profile.userName) and set("description", profile.description)
         )
     ) match {
       case Left(err) => F.fail(QueryFailure(err.toString, new Throwable(err.toString)))

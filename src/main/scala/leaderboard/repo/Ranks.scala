@@ -21,7 +21,7 @@ object Ranks {
           rank    = scores.indexWhere(_.id == userId) + 1
           score   <- scores.find(_.id == userId).map(_.score)
         } yield RankedProfile(
-          name        = profile.name,
+          name        = profile.userName,
           description = profile.description,
           rank        = rank,
           score       = score,

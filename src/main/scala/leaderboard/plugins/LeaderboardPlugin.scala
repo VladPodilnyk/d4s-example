@@ -2,10 +2,12 @@ package leaderboard.plugins
 
 import akka.stream.alpakka.dynamodb.DynamoClient
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import d4s.models.table.TableDef
 import distage.config.ConfigModuleDef
 import distage.plugins.PluginDef
 import distage.{ModuleDef, TagKK}
 import leaderboard.config.{DynamoCfg, ProvisioningCfg}
+import leaderboard.dynamo.d4s.{D4SLadder, D4SProfiles, LadderTable, ProfilesTable}
 import leaderboard.dynamo.java.{AwsLadder, AwsProfiles, DynamoHelper}
 import leaderboard.dynamo.scanamo.{AlpakkaLadder, AlpakkaProfiles, ScanamoLadder, ScanamoUtils}
 import leaderboard.http.HttpApi
@@ -23,6 +25,7 @@ object LeaderboardPlugin extends PluginDef {
   include(modules.repoScanamo[IO])
   include(modules.clients)
   include(modules.configs)
+  include(d4s.modules.D4SModule[IO])
 
   object modules {
     def roles[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
@@ -76,6 +79,20 @@ object LeaderboardPlugin extends PluginDef {
         cfg: DynamoCfg =>
           ScanamoUtils.makeAlpakkaClient(cfg)
       }
+    }
+
+    def repoD4S[F[+_, +_]: TagKK]: ModuleDef = new ModuleDef {
+      tag(CustomAxis.D4S)
+
+      make[LadderTable]
+      make[ProfilesTable]
+
+      many[TableDef]
+        .weak[LadderTable]
+        .weak[ProfilesTable]
+
+      make[Ladder[F]].from[D4SLadder[F]].named("d4s-ladder")
+      make[Profiles[F]].from[D4SProfiles[F]].named("d4s-profiles")
     }
 
     val configs: ConfigModuleDef = new ConfigModuleDef {

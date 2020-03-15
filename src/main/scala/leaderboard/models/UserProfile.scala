@@ -4,7 +4,7 @@ import io.circe.Codec
 import io.circe.derivation.deriveCodec
 
 final case class UserProfile(
-  name: String,
+  userName: String,
   description: String,
 )
 

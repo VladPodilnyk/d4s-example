@@ -37,6 +37,8 @@ final class LeaderboardServiceRole[F[+_, +_]: ConcurrentThrowable: TTimer: BIO: 
   }
 }
 
+object MainProdD4S extends MainBase(Activation(CustomAxis -> CustomAxis.D4S))
+
 object MainProdAmz extends MainBase(Activation(CustomAxis -> CustomAxis.Amz))
 
 object MainProdScanamo extends MainBase(Activation(CustomAxis -> CustomAxis.Scanamo))

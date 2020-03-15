@@ -27,7 +27,7 @@ final class AlpakkaProfiles[F[+_, +_]: BIOAsync](client: DynamoClient) extends P
           profilesTableDef
             .update(
               "userId" -> userId.value.toString,
-              set("name", profile.name) and set("description", profile.description)
+              set("name", profile.userName) and set("description", profile.description)
             )
         )
       ).flatMap {
