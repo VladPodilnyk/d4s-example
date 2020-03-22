@@ -1,7 +1,8 @@
 package leaderboard.repo
 
 import izumi.functional.bio.BIOMonad
-import leaderboard.models.{QueryFailure, RankedProfile, UserId}
+import leaderboard.models.common.UserId
+import leaderboard.models.{QueryFailure, RankedProfile}
 
 trait Ranks[F[_, _]] {
   def getRank(userId: UserId): F[QueryFailure, Option[RankedProfile]]
@@ -18,8 +19,8 @@ object Ranks {
         scores       <- ladder.getScores
         res = for {
           profile <- maybeProfile
-          rank    = scores.indexWhere(_.id == userId) + 1
-          score   <- scores.find(_.id == userId).map(_.score)
+          rank    = scores.indexWhere(_.userId == userId) + 1
+          score   <- scores.find(_.userId == userId).map(_.score)
         } yield RankedProfile(
           name        = profile.userName,
           description = profile.description,

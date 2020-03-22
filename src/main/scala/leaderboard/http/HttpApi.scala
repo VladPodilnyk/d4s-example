@@ -3,8 +3,10 @@ package leaderboard.http
 import io.circe.syntax._
 import izumi.functional.bio.BIO
 import izumi.functional.bio.catz._
-import leaderboard.models.{Score, UserId, UserProfile}
+import leaderboard.models.UserProfile
+import leaderboard.models.common.{Score, UserId}
 import leaderboard.repo.{Ladder, Profiles, Ranks}
+import net.playq.metrics.MetricsExtractor
 import org.http4s.HttpRoutes
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -19,7 +21,8 @@ object HttpApi {
   final class Impl[F[+_, +_]: BIO](
     ladder: Ladder[F],
     profiles: Profiles[F],
-    ranks: Ranks[F]
+    ranks: Ranks[F],
+    metricsGetter: MetricsExtractor
   ) extends HttpApi[F]
     with Http4sDsl[F[Throwable, ?]] {
 
@@ -37,8 +40,7 @@ object HttpApi {
         Ok(ladder.submitScore(UserId(userId), Score(score)))
 
       case GET -> Root / "profile" / UUIDVar(id) =>
-        //Ok(ranks.getRank(UserId(id)).map(_.asJson))
-        Ok(profiles.getProfile(UserId(id)).map(_.asJson))
+        Ok(ranks.getRank(UserId(id)).map(_.asJson))
 
       case request @ POST -> Root / "profile" / UUIDVar(userId) =>
         Ok(for {
@@ -46,6 +48,8 @@ object HttpApi {
           _       <- profiles.setProfile(UserId(userId), profile)
         } yield ())
 
+      case GET -> Root / "metrics" =>
+        Ok(metricsGetter.collectMetrics.asJson)
     }
   }
 

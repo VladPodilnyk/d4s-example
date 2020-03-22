@@ -2,7 +2,9 @@ package leaderboard.dynamo.d4s
 
 import d4s.DynamoConnector
 import izumi.functional.bio.BIO
-import leaderboard.models.{QueryFailure, UserId, UserProfile, UserProfileWithId}
+import leaderboard.dynamo.d4s.ProfilesTable.UserProfileWithIdStored
+import leaderboard.models.common.UserId
+import leaderboard.models.{QueryFailure, UserProfile}
 import leaderboard.repo.Profiles
 
 final class D4SProfiles[F[+_, +_]: BIO](
@@ -24,7 +26,7 @@ final class D4SProfiles[F[+_, +_]: BIO](
   override def setProfile(userId: UserId, profile: UserProfile): F[QueryFailure, Unit] = {
     connector
       .run("set-profile") {
-        table.updateItem(UserProfileWithId(userId, profile)).void
+        table.updateItem(UserProfileWithIdStored(userId.value, profile.userName, profile.description)).void
       }.leftMap(err => QueryFailure(err.queryName, err.cause))
   }
 }

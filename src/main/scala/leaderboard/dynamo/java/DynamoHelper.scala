@@ -21,7 +21,7 @@ object DynamoHelper {
     DynamoDbClient
       .builder()
       .httpClientBuilder(new ApacheSdkHttpService().createHttpClientBuilder())
-      .pipe(_.endpointOverride(URI.create(cfg.uri)))
+      .pipe(_.endpointOverride(URI.create(cfg.endpointUrl)))
       .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("x", "x")))
       .region(Region.of(cfg.region))
       .build()

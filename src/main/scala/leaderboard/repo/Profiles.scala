@@ -2,7 +2,8 @@ package leaderboard.repo
 
 import izumi.distage.model.definition.DIResource
 import izumi.functional.bio.{BIOMonad, BIOPrimitives, F}
-import leaderboard.models.{QueryFailure, UserId, UserProfile}
+import leaderboard.models.common.UserId
+import leaderboard.models.{QueryFailure, UserProfile}
 
 trait Profiles[F[_, _]] {
   def setProfile(userId: UserId, profile: UserProfile): F[QueryFailure, Unit]

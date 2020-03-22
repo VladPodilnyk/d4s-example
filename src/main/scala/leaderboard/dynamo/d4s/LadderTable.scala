@@ -3,8 +3,10 @@ package leaderboard.dynamo.d4s
 import java.util.UUID
 
 import d4s.config.DynamoMeta
-import d4s.models.table.{DynamoField, DynamoKey, TableDDL, TableDef, TableReference}
-import leaderboard.models.UserId
+import d4s.models.table._
+import io.circe.{Codec, derivation}
+import leaderboard.models.UserWithScore
+import leaderboard.models.common.{Score, UserId}
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 final class LadderTable(implicit meta: DynamoMeta) extends TableDef {
@@ -16,5 +18,14 @@ final class LadderTable(implicit meta: DynamoMeta) extends TableDef {
 
   def mainFullKey(userId: UserId): Map[String, AttributeValue] = {
     mainKey.bind(userId.value)
+  }
+}
+
+object LadderTable {
+  final case class UserIdWithScoreStored(userId: UUID, score: Long){
+    def toAPI: UserWithScore = UserWithScore(UserId(userId), Score(score))
+  }
+  object UserIdWithScoreStored {
+    implicit val codec: Codec.AsObject[UserIdWithScoreStored] = derivation.deriveCodec[UserIdWithScoreStored]
   }
 }

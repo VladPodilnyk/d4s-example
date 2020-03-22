@@ -1,7 +1,8 @@
 package leaderboard.dynamo.java
 
 import izumi.functional.bio.{BIO, BlockingIO, F}
-import leaderboard.models.{QueryFailure, UserId, UserProfile}
+import leaderboard.models.common.UserId
+import leaderboard.models.{QueryFailure, UserProfile}
 import leaderboard.repo.Profiles
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, GetItemRequest, UpdateItemRequest}

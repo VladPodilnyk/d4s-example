@@ -3,7 +3,8 @@ package leaderboard.dynamo.java
 import java.util.UUID
 
 import izumi.functional.bio.{BIO, BlockingIO, F}
-import leaderboard.models.{QueryFailure, Score, UserId, UserWithScore}
+import leaderboard.models.common.{Score, UserId}
+import leaderboard.models.{QueryFailure, UserWithScore}
 import leaderboard.repo.Ladder
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, ScanRequest, UpdateItemRequest}

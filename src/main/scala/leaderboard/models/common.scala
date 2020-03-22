@@ -1,11 +1,11 @@
-package leaderboard
+package leaderboard.models
 
 import java.util.UUID
 
 import io.circe.Codec
 import io.circe.derivation.deriveCodec
 
-package object models {
+object common {
   final case class UserId(value: UUID) extends AnyVal
   object UserId {
     implicit val codec: Codec.AsObject[UserId] = deriveCodec[UserId]

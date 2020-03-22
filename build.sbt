@@ -51,7 +51,8 @@ val Deps = new {
 
   val akka = "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % V.akka
 
-  val d4s = "net.playq" %% "dynamo" % V.d4s
+  val d4s        = "net.playq" %% "dynamo" % V.d4s
+  //val d4sMetrics = "net.playq" %% "dynamo" % V.d4s
 }
 
 inThisBuild(
@@ -96,7 +97,8 @@ lazy val leaderboard = project
       Deps.scanamo,
       Deps.scanamoAlpakka,
       Deps.akka,
-      Deps.d4s
+      Deps.d4s,
+      //Deps.d4sMetrics
     ),
     addCompilerPlugin(Deps.kindProjector),
   )

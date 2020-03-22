@@ -4,9 +4,10 @@ import java.util.UUID
 
 import d4s.config.DynamoMeta
 import d4s.models.table._
-import io.circe.{Codec, Encoder}
+import io.circe.Codec
 import io.circe.derivation.deriveCodec
-import leaderboard.models.{UserId, UserProfile, UserProfileWithId}
+import leaderboard.models.common.UserId
+import leaderboard.models.{UserProfile, UserProfileWithId}
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 final class ProfilesTable(implicit meta: DynamoMeta) extends TableDef {
@@ -22,8 +23,8 @@ final class ProfilesTable(implicit meta: DynamoMeta) extends TableDef {
 }
 
 object ProfilesTable {
-  final case class UserProfileWithIdStored(id: UUID, userName: String, description: String) {
-    def toAPI: UserProfileWithId = UserProfileWithId(UserId(id), UserProfile(userName, description))
+  final case class UserProfileWithIdStored(userId: UUID, userName: String, description: String) {
+    def toAPI: UserProfileWithId = UserProfileWithId(UserId(userId), UserProfile(userName, description))
   }
   object UserProfileWithIdStored {
     implicit val codec: Codec.AsObject[UserProfileWithIdStored] = deriveCodec[UserProfileWithIdStored]

@@ -1,3 +1,3 @@
 package leaderboard.config
 
-final case class DynamoCfg(uri: String, region: String, provisioning: ProvisioningCfg)
+final case class DynamoCfg(endpointUrl: String, region: String, provisioning: ProvisioningCfg)

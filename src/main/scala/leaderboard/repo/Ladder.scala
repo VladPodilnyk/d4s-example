@@ -2,7 +2,8 @@ package leaderboard.repo
 
 import izumi.distage.model.definition.DIResource
 import izumi.functional.bio.{BIOMonad, BIOPrimitives, F}
-import leaderboard.models.{QueryFailure, Score, UserId, UserWithScore}
+import leaderboard.models.common.{Score, UserId}
+import leaderboard.models.{QueryFailure, UserWithScore}
 
 trait Ladder[F[_, _]] {
   def submitScore(userId: UserId, score: Score): F[QueryFailure, Unit]
