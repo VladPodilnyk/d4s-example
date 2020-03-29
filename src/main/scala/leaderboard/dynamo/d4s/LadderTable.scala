@@ -2,9 +2,9 @@ package leaderboard.dynamo.d4s
 
 import java.util.UUID
 
+import d4s.codecs.D4SCodec
 import d4s.config.DynamoMeta
 import d4s.models.table._
-import io.circe.{Codec, derivation}
 import leaderboard.models.UserWithScore
 import leaderboard.models.common.{Score, UserId}
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
@@ -26,6 +26,6 @@ object LadderTable {
     def toAPI: UserWithScore = UserWithScore(UserId(userId), Score(score))
   }
   object UserIdWithScoreStored {
-    implicit val codec: Codec.AsObject[UserIdWithScoreStored] = derivation.deriveCodec[UserIdWithScoreStored]
+    implicit val codec: D4SCodec[UserIdWithScoreStored] = D4SCodec.derive[UserIdWithScoreStored]
   }
 }

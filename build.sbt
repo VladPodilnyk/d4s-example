@@ -12,7 +12,7 @@ val V = new {
   val awsJavaSdk2     = "2.7.36"
   val scanamo         = "1.0.0-M12"
   val akka            = "1.1.2"
-  val d4s             = "1.0.0-SNAPSHOT"
+  val d4s             = "1.0.1-SNAPSHOT"
 }
 
 val Deps = new {
@@ -33,10 +33,6 @@ val Deps = new {
 
   val circeDerivation = "io.circe" %% "circe-derivation" % V.circeDerivation
 
-  val doobie         = "org.tpolecat" %% "doobie-core" % V.doobie
-  val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % V.doobie
-  val doobieHikari   = "org.tpolecat" %% "doobie-hikari" % V.doobie
-
   val kindProjector = "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
 
   val zio     = "dev.zio" %% "zio" % V.zio
@@ -51,8 +47,8 @@ val Deps = new {
 
   val akka = "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % V.akka
 
-  val d4s        = "net.playq" %% "dynamo" % V.d4s
-  //val d4sMetrics = "net.playq" %% "dynamo" % V.d4s
+  val d4s       = "net.playq" %% "dynamo" % V.d4s
+  val d4s_circe = "net.playq" %% "dynamo-circe" % V.d4s
 }
 
 inThisBuild(
@@ -73,6 +69,7 @@ lazy val leaderboard = project
     scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Compile).value};${(moduleName in Compile).value}",
     scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Test).value};${(moduleName in Test).value}",
     scalacOptions --= Seq("-Werror", "-Xfatal-warnings"),
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     libraryDependencies ++= Seq(
       Deps.distageCore,
       Deps.distageRoles,
@@ -87,9 +84,6 @@ lazy val leaderboard = project
       Deps.http4sClient % Test,
       Deps.http4sCirce,
       Deps.circeDerivation,
-      Deps.doobie,
-      Deps.doobiePostgres,
-      Deps.doobieHikari,
       Deps.zio,
       Deps.zioCats,
       Deps.awsDynamo,
@@ -98,7 +92,7 @@ lazy val leaderboard = project
       Deps.scanamoAlpakka,
       Deps.akka,
       Deps.d4s,
-      //Deps.d4sMetrics
+      Deps.d4s_circe
     ),
     addCompilerPlugin(Deps.kindProjector),
   )
