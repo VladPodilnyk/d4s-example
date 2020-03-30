@@ -1,4 +1,5 @@
-# D4S example
+# D4S example 
+![Build](https://github.com/VladPodilnyk/scalaua2020/workflows/Build/badge.svg)
 
 Example `d4s` project presented at ScalaUA 2020.
 Features:
