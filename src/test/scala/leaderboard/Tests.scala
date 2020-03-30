@@ -1,6 +1,8 @@
 package leaderboard
 
+import d4s.DynamoDDLService
 import d4s.test.envs.D4SDockerModule
+import d4s.test.envs.DynamoTestEnv.DDLDown
 import izumi.distage.docker.Docker
 import izumi.distage.docker.modules.DockerContainerModule
 import izumi.distage.model.definition.StandardAxis.Env
@@ -33,6 +35,8 @@ abstract class LeaderboardTest extends DistageBIOEnvSpecScalatest[ZIO] with Asse
       DIKey.get[AwsNameSpace],
       DIKey.get[Ladder[IO]],
       DIKey.get[Profiles[IO]],
+      DIKey.get[DynamoDDLService[IO]],
+      DIKey.get[DDLDown],
     ),
     configBaseName = "leaderboard-test",
   )
@@ -81,38 +85,14 @@ abstract class LadderTest extends LeaderboardTest {
           _     <- assertIO(res contains score)
         } yield ()
     }
-
-    "assign a higher position in the list to a higher score" in {
-      (rnd: Rnd[IO], ladder: Ladder[IO]) =>
-        for {
-          user1  <- rnd[UserId]
-          score1 <- rnd[Score]
-          user2  <- rnd[UserId]
-          score2 <- rnd[Score]
-
-          _      <- ladder.submitScore(user1, score1)
-          _      <- ladder.submitScore(user2, score2)
-          scores <- ladder.getScores
-
-          user1Rank = scores.indexWhere(_.userId == user1)
-          user2Rank = scores.indexWhere(_.userId == user2)
-
-          _ <- if (score1.value > score2.value) {
-            assertIO(user1Rank < user2Rank)
-          } else if (score2.value > score1.value) {
-            assertIO(user2Rank < user1Rank)
-          } else IO.unit
-        } yield ()
-    }
   }
-
 }
 
 abstract class ProfilesTest extends LeaderboardTest {
   "Profiles" should {
     "set & get" in {
       (rnd: Rnd[IO], profiles: Profiles[IO]) =>
-      for {
+        for {
           user    <- rnd[UserId]
           name    <- rnd[String]
           desc    <- rnd[String]
@@ -142,43 +122,43 @@ abstract class RanksTest extends LeaderboardTest {
 
     "return None for a user with no profile" in {
       (rnd: Rnd[IO], ranks: Ranks[IO], ladder: Ladder[IO]) =>
-      for {
-        user  <- rnd[UserId]
-        score <- rnd[Score]
-        _     <- ladder.submitScore(user, score)
-        res1  <- ranks.getRank(user)
-        _     <- assertIO(res1.isEmpty)
-      } yield ()
+        for {
+          user  <- rnd[UserId]
+          score <- rnd[Score]
+          _     <- ladder.submitScore(user, score)
+          res1  <- ranks.getRank(user)
+          _     <- assertIO(res1.isEmpty)
+        } yield ()
     }
 
     "assign a higher rank to a user with more score" in {
       (rnd: Rnd[IO], ranks: Ranks[IO], profiles: Profiles[IO], ladder: Ladder[IO]) =>
-      for {
-        user1  <- rnd[UserId]
-        name1  <- rnd[String]
-        desc1  <- rnd[String]
-        score1 <- rnd[Score]
+        for {
+          user1  <- rnd[UserId]
+          name1  <- rnd[String]
+          desc1  <- rnd[String]
+          score1 <- rnd[Score]
 
-        user2  <- rnd[UserId]
-        name2  <- rnd[String]
-        desc2  <- rnd[String]
-        score2 <- rnd[Score]
+          user2  <- rnd[UserId]
+          name2  <- rnd[String]
+          desc2  <- rnd[String]
+          score2 <- rnd[Score]
 
-        _ <- profiles.setProfile(user1, UserProfile(name1, desc1))
-        _ <- ladder.submitScore(user1, score1)
+          _ <- profiles.setProfile(user1, UserProfile(name1, desc1))
+          _ <- ladder.submitScore(user1, score1)
 
-        _ <- profiles.setProfile(user2, UserProfile(name2, desc2))
-        _ <- ladder.submitScore(user2, score2)
+          _ <- profiles.setProfile(user2, UserProfile(name2, desc2))
+          _ <- ladder.submitScore(user2, score2)
 
-        user1Rank <- ranks.getRank(user1).map(_.get.rank)
-        user2Rank <- ranks.getRank(user2).map(_.get.rank)
+          user1Rank <- ranks.getRank(user1).map(_.get.rank)
+          user2Rank <- ranks.getRank(user2).map(_.get.rank)
 
-        _ <- if (score1.value > score2.value) {
-          assertIO(user1Rank > user2Rank)
-        } else if (score1.value < score2.value) {
-          assertIO(user1Rank < user2Rank)
-        } else IO.unit
-      } yield ()
+          _ <- if (score1.value > score2.value) {
+            assertIO(user1Rank > user2Rank)
+          } else if (score1.value < score2.value) {
+            assertIO(user1Rank < user2Rank)
+          } else IO.unit
+        } yield ()
     }
   }
 }
