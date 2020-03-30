@@ -2,9 +2,10 @@ package leaderboard.plugins
 
 import d4s.models.table.TableDef
 import d4s.modules.D4SModule
+import distage.TagKK
 import distage.config.ConfigModuleDef
 import distage.plugins.PluginDef
-import distage.{ModuleDef, TagKK}
+import izumi.distage.model.definition.ModuleDef
 import leaderboard.config.{DynamoCfg, ProvisioningCfg}
 import leaderboard.dynamo.d4s.{D4SLadder, D4SProfiles, LadderTable, ProfilesTable}
 import leaderboard.dynamo.java.{AwsLadder, AwsProfiles, DynamoHelper}

@@ -49,6 +49,7 @@ val Deps = new {
 
   val d4s       = "net.playq" %% "dynamo" % V.d4s
   val d4s_circe = "net.playq" %% "dynamo-circe" % V.d4s
+  val d4s_test  = "net.playq" %% "dynamo-test" % V.d4s
 }
 
 inThisBuild(
@@ -92,7 +93,8 @@ lazy val leaderboard = project
       Deps.scanamoAlpakka,
       Deps.akka,
       Deps.d4s,
-      Deps.d4s_circe
+      Deps.d4s_circe,
+      Deps.d4s_test % Test,
     ),
     addCompilerPlugin(Deps.kindProjector),
   )
