@@ -12,7 +12,7 @@ val V = new {
   val awsJavaSdk2     = "2.7.36"
   val scanamo         = "1.0.0-M12"
   val akka            = "1.1.2"
-  val d4s             = "1.0.1-SNAPSHOT"
+  val d4s             = "1.0.1"
 }
 
 val Deps = new {
@@ -47,9 +47,9 @@ val Deps = new {
 
   val akka = "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % V.akka
 
-  val d4s       = "net.playq" %% "dynamo" % V.d4s
-  val d4s_circe = "net.playq" %% "dynamo-circe" % V.d4s
-  val d4s_test  = "net.playq" %% "dynamo-test" % V.d4s
+  val d4s       = "net.playq" %% "d4s" % V.d4s
+  val d4s_circe = "net.playq" %% "d4s-circe" % V.d4s
+  val d4s_test  = "net.playq" %% "d4s-test" % V.d4s
 }
 
 inThisBuild(
@@ -70,7 +70,7 @@ lazy val leaderboard = project
     scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Compile).value};${(moduleName in Compile).value}",
     scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Test).value};${(moduleName in Test).value}",
     scalacOptions --= Seq("-Werror", "-Xfatal-warnings"),
-    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+    //resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     libraryDependencies ++= Seq(
       Deps.distageCore,
       Deps.distageRoles,
