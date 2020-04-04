@@ -64,10 +64,8 @@ lazy val leaderboard = project
   .settings(
     name := "LeaderBoard",
     scalacOptions in Compile += s"-Xmacro-settings:metricsDir=${(classDirectory in Compile).value}",
-    scalacOptions in Test += s"-Xmacro-settings:metricsDir=${(classDirectory in Compile).value}",
     scalacOptions in Test += s"-Xmacro-settings:metricsDir=${(classDirectory in Test).value}",
     scalacOptions in Compile += s"-Xmacro-settings:metricsRole=${(name in Compile).value};${(moduleName in Compile).value}",
-    scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Compile).value};${(moduleName in Compile).value}",
     scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Test).value};${(moduleName in Test).value}",
     scalacOptions --= Seq("-Werror", "-Xfatal-warnings"),
     //resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
