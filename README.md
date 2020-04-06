@@ -5,7 +5,7 @@ Example `d4s` project presented at ScalaUA 2020.
 Features:
 - [_d4s_](https://github.com/PlayQ/d4s) - the brand new hyper-pragmatic library for DynamoDB.
 - [izumi](https://izumi.7mind.io/latest/release/doc/index.html) - Scala libraries that makes your life easier :^)
-- [Bifunctor Tagless Final](https://github.com/7mind/izumi/blob/v0.10.0-M5/fundamentals/fundamentals-bio/src/main/scala/izumi/functional/bio/package.scala)
+- [Bifunctor Tagless Final](https://izumi.7mind.io/latest/release/doc/bio/index.html)
 
 __Note__: To launch tests that require postgres ensure you have a docker daemon running in the background.
  
