@@ -10,7 +10,7 @@ val V = new {
   val kindProjector   = "0.11.0"
   val circeDerivation = "0.12.0-M7"
   val awsJavaSdk2     = "2.7.36"
-  val scanamo         = "1.0.0-M12"
+  val scanamo         = "1.0.0-M12-1"
   val akka            = "1.1.2"
   val d4s             = "1.0.1"
 }
