@@ -1,18 +1,18 @@
 val V = new {
-  val distage         = "0.10.2-M8"
+  val distage         = "0.10.6"
   val logstage        = "0.10.2-M8"
   val scalatest       = "3.1.1"
   val scalacheck      = "1.14.3"
-  val http4s          = "0.21.4"
+  val http4s          = "0.21.3"
   val doobie          = "0.8.8"
-  val zio             = "1.0.0-RC17"
+  val zio             = "1.0.0-RC18-2"
   val zioCats         = "2.0.0.0-RC10"
   val kindProjector   = "0.11.0"
   val circeDerivation = "0.12.0-M7"
   val awsJavaSdk2     = "2.7.36"
   val scanamo         = "1.0.0-M12"
   val akka            = "1.1.2"
-  val d4s             = "1.0.1"
+  val d4s             = "1.0.5"
 }
 
 val Deps = new {
