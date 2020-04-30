@@ -15,7 +15,7 @@ final class D4SLadder[F[+_, +_]: BIO](connector: DynamoConnector[F], ladderTable
       .run("get scores query") {
         table.scan.decodeItems[UserIdWithScoreStored].execPagedFlatten()
       }
-      .leftMap(err => QueryFailure(err.queryName, err.cause))
+      .leftMap(err => QueryFailure(err.message, err.cause))
       .map(_.map(_.toAPI))
   }
 
@@ -23,6 +23,6 @@ final class D4SLadder[F[+_, +_]: BIO](connector: DynamoConnector[F], ladderTable
     connector
       .run("submit user's score") {
         table.updateItem(UserIdWithScoreStored(userId.value, score.value))
-      }.leftMap(err => QueryFailure(err.queryName, err.cause)).void
+      }.leftMap(err => QueryFailure(err.message, err.cause)).void
   }
 }

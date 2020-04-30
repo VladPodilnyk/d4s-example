@@ -26,6 +26,6 @@ object LadderTable {
     def toAPI: UserWithScore = UserWithScore(UserId(userId), Score(score))
   }
   object UserIdWithScoreStored {
-    implicit val codec: D4SCodec[UserIdWithScoreStored] = D4SCodec.derive[UserIdWithScoreStored]
+    implicit val codec: D4SCodec[UserIdWithScoreStored] = D4SCodec.derived[UserIdWithScoreStored]
   }
 }

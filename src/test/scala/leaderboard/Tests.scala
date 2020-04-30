@@ -36,7 +36,7 @@ abstract class LeaderboardTest extends DistageBIOEnvSpecScalatest[ZIO] with Asse
       DIKey.get[Ladder[IO]],
       DIKey.get[Profiles[IO]],
       DIKey.get[DynamoDDLService[IO]],
-      DIKey.get[DDLDown],
+      DIKey.get[DDLDown[IO]],
     ),
     configBaseName = "leaderboard-test",
   )

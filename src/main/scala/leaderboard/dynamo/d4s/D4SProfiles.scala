@@ -20,13 +20,13 @@ final class D4SProfiles[F[+_, +_]: BIO](
         table
           .getItem(mainFullKey(userId))
           .decodeItem[UserProfile]
-      }.leftMap(err => QueryFailure(err.queryName, err.cause))
+      }.leftMap(err => QueryFailure(err.message, err.cause))
   }
 
   override def setProfile(userId: UserId, profile: UserProfile): F[QueryFailure, Unit] = {
     connector
       .run("set-profile") {
         table.updateItem(UserProfileWithIdStored(userId.value, profile.userName, profile.description)).void
-      }.leftMap(err => QueryFailure(err.queryName, err.cause))
+      }.leftMap(err => QueryFailure(err.message, err.cause))
   }
 }

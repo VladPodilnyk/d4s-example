@@ -26,6 +26,6 @@ object ProfilesTable {
     def toAPI: UserProfileWithId = UserProfileWithId(UserId(userId), UserProfile(userName, description))
   }
   object UserProfileWithIdStored {
-    implicit val codec: D4SCodec[UserProfileWithIdStored] = D4SCodec.derive[UserProfileWithIdStored]
+    implicit val codec: D4SCodec[UserProfileWithIdStored] = D4SCodec.derived[UserProfileWithIdStored]
   }
 }

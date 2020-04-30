@@ -5,6 +5,7 @@ import izumi.functional.bio.BIO
 import izumi.functional.bio.catz._
 import leaderboard.models.UserProfile
 import leaderboard.models.common.{Score, UserId}
+import leaderboard.models.common.MetricsCodecs._
 import leaderboard.repo.{Ladder, Profiles, Ranks}
 import net.playq.metrics.MetricsExtractor
 import org.http4s.HttpRoutes

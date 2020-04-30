@@ -12,5 +12,5 @@ final case class UserProfile(
 
 object UserProfile {
   implicit val codec: Codec.AsObject[UserProfile] = deriveCodec[UserProfile]
-  implicit val d4sCodec: D4SCodec[UserProfile]    = D4SCirceCodec.derive
+  implicit val d4sCodec: D4SCodec[UserProfile]    = D4SCirceCodec.derived
 }
