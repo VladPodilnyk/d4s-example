@@ -11,7 +11,7 @@ val V = new {
   val circeDerivation = "0.12.0-M7"
   val awsJavaSdk2     = "2.7.36"
   val scanamo         = "1.0.0-M12"
-  val akka            = "2.0.0"
+  val akka            = "2.0.1"
   val d4s             = "1.0.5"
 }
 
