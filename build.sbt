@@ -12,7 +12,7 @@ val V = new {
   val awsJavaSdk2     = "2.13.76"
   val scanamo         = "1.0.0-M12"
   val akka            = "2.0.0"
-  val d4s             = "1.0.10"
+  val d4s             = "1.0.13"
 }
 
 val Deps = new {
