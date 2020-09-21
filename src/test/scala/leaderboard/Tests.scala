@@ -4,7 +4,7 @@ import d4s.DynamoDDLService
 import d4s.test.envs.D4SDockerModule
 import d4s.test.envs.DynamoTestEnv.DDLDown
 import izumi.distage.docker.Docker
-import izumi.distage.docker.modules.DockerContainerModule
+import izumi.distage.docker.modules.DockerSupportModule
 import izumi.distage.model.definition.StandardAxis.Env
 import izumi.distage.model.definition.{Activation, ModuleDef}
 import izumi.distage.model.reflection.DIKey
@@ -25,7 +25,7 @@ abstract class LeaderboardTest extends DistageBIOEnvSpecScalatest[ZIO] with Asse
     moduleOverrides = new ModuleDef {
       make[Rnd[IO]].from[Rnd.Impl[IO]]
 
-      include(new DockerContainerModule[Task] overridenBy new ModuleDef {
+      include(new DockerSupportModule[Task] overridenBy new ModuleDef {
         make[Docker.ClientConfig].fromValue(dockerConf)
       })
       include(D4SDockerModule[IO])
@@ -54,13 +54,13 @@ abstract class LeaderboardTest extends DistageBIOEnvSpecScalatest[ZIO] with Asse
 
 trait DummyTest extends LeaderboardTest {
   override final def config = super.config.copy(
-    activation = super.config.activation ++ Activation(CustomAxis -> CustomAxis.Dummy),
+    activation = super.config.activation ++ Activation(CustomAxis -> CustomAxis.Dummy)
   )
 }
 
 trait ProdD4STest extends LeaderboardTest {
   override final def config = super.config.copy(
-    activation = super.config.activation ++ Activation(CustomAxis -> CustomAxis.D4S),
+    activation = super.config.activation ++ Activation(CustomAxis -> CustomAxis.Prod)
   )
 }
 
@@ -94,9 +94,7 @@ abstract class ProfilesTest extends LeaderboardTest {
       (rnd: Rnd[IO], profiles: Profiles[IO]) =>
         for {
           user    <- rnd[UserId]
-          name    <- rnd[String]
-          desc    <- rnd[String]
-          profile = UserProfile(name, desc)
+          profile <- rnd[UserProfile]
           _       <- profiles.setProfile(user, profile)
           res     <- profiles.getProfile(user)
           _       <- assertIO(res contains profile)
@@ -111,9 +109,7 @@ abstract class RanksTest extends LeaderboardTest {
       (rnd: Rnd[IO], ranks: Ranks[IO], profiles: Profiles[IO]) =>
         for {
           user    <- rnd[UserId]
-          name    <- rnd[String]
-          desc    <- rnd[String]
-          profile = UserProfile(name, desc)
+          profile <- rnd[UserProfile]
           _       <- profiles.setProfile(user, profile)
           res1    <- ranks.getRank(user)
           _       <- assertIO(res1.isEmpty)
@@ -134,30 +130,29 @@ abstract class RanksTest extends LeaderboardTest {
     "assign a higher rank to a user with more score" in {
       (rnd: Rnd[IO], ranks: Ranks[IO], profiles: Profiles[IO], ladder: Ladder[IO]) =>
         for {
-          user1  <- rnd[UserId]
-          name1  <- rnd[String]
-          desc1  <- rnd[String]
-          score1 <- rnd[Score]
+          user1    <- rnd[UserId]
+          profile1 <- rnd[UserProfile]
+          score1   <- rnd[Score]
 
-          user2  <- rnd[UserId]
-          name2  <- rnd[String]
-          desc2  <- rnd[String]
-          score2 <- rnd[Score]
+          user2    <- rnd[UserId]
+          profile2 <- rnd[UserProfile]
+          score2   <- rnd[Score]
 
-          _ <- profiles.setProfile(user1, UserProfile(name1, desc1))
+          _ <- profiles.setProfile(user1, profile1)
           _ <- ladder.submitScore(user1, score1)
 
-          _ <- profiles.setProfile(user2, UserProfile(name2, desc2))
+          _ <- profiles.setProfile(user2, profile2)
           _ <- ladder.submitScore(user2, score2)
 
           user1Rank <- ranks.getRank(user1).map(_.get.rank)
           user2Rank <- ranks.getRank(user2).map(_.get.rank)
 
-          _ <- if (score1.value > score2.value) {
-            assertIO(user1Rank > user2Rank)
-          } else if (score1.value < score2.value) {
-            assertIO(user1Rank < user2Rank)
-          } else IO.unit
+          _ <-
+            if (score1.value > score2.value) {
+              assertIO(user1Rank > user2Rank)
+            } else if (score1.value < score2.value) {
+              assertIO(user1Rank < user2Rank)
+            } else IO.unit
         } yield ()
     }
   }

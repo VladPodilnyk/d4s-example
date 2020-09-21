@@ -1,8 +1,8 @@
-package leaderboard.dynamo.d4s
+package leaderboard.dynamo
 
 import d4s.DynamoConnector
 import izumi.functional.bio.BIO
-import leaderboard.dynamo.d4s.ProfilesTable.UserProfileWithIdStored
+import ProfilesTable.UserProfileWithIdStored
 import leaderboard.models.common.UserId
 import leaderboard.models.{QueryFailure, UserProfile}
 import leaderboard.repo.Profiles

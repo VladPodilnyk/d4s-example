@@ -3,15 +3,11 @@ val V = new {
   val logstage        = "0.10.16"
   val scalatest       = "3.1.4"
   val scalacheck      = "1.14.3"
-  val http4s          = "0.21.7"
-  val doobie          = "0.8.8"
-  val zio             = "1.0.1"
+  val http4s          = "0.21.6"
+  val zio             = "1.0.0-RC21-2"
   val zioCats         = "2.0.0.0-RC13"
   val kindProjector   = "0.11.0"
   val circeDerivation = "0.12.0-M7"
-  val awsJavaSdk2     = "2.13.76"
-  val scanamo         = "1.0.0-M12"
-  val akka            = "2.0.0"
   val d4s             = "1.0.13"
 }
 
@@ -38,15 +34,6 @@ val Deps = new {
   val zio     = "dev.zio" %% "zio" % V.zio
   val zioCats = "dev.zio" %% "zio-interop-cats" % V.zioCats
 
-  val awsDynamo = "software.amazon.awssdk" % "dynamodb" % V.awsJavaSdk2 exclude ("log4j", "log4j")
-
-  val awsImplApache = "software.amazon.awssdk" % "apache-client" % V.awsJavaSdk2 exclude ("log4j", "log4j")
-
-  val scanamo        = "org.scanamo" %% "scanamo" % V.scanamo
-  val scanamoAlpakka = "org.scanamo" %% "scanamo-alpakka" % V.scanamo
-
-  val akka = "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % V.akka
-
   val d4s       = "net.playq" %% "d4s" % V.d4s
   val d4s_circe = "net.playq" %% "d4s-circe" % V.d4s
   val d4s_test  = "net.playq" %% "d4s-test" % V.d4s
@@ -54,7 +41,7 @@ val Deps = new {
 
 inThisBuild(
   Seq(
-    scalaVersion := "2.13.1",
+    scalaVersion := "2.13.2",
     version := "1.0.0-SNAPSHOT",
   )
 )
@@ -85,11 +72,6 @@ lazy val leaderboard = project
       Deps.circeDerivation,
       Deps.zio,
       Deps.zioCats,
-      Deps.awsDynamo,
-      Deps.awsImplApache,
-      Deps.scanamo,
-      Deps.scanamoAlpakka,
-      Deps.akka,
       Deps.d4s,
       Deps.d4s_circe,
       Deps.d4s_test % Test,
