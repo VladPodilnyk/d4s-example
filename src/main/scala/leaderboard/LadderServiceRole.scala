@@ -5,7 +5,6 @@ import distage.plugins.PluginConfig
 import izumi.distage.model.definition.{Axis, DIResource}
 import izumi.distage.roles.model.{RoleDescriptor, RoleService}
 import izumi.distage.roles.{RoleAppLauncher, RoleAppMain}
-import izumi.functional.bio.{BIO, BlockingIO}
 import izumi.fundamentals.platform.cli.model.raw.{RawEntrypointParams, RawRoleParams}
 import leaderboard.effects.{ConcurrentThrowable, TTimer}
 import leaderboard.http.HttpApi
@@ -14,7 +13,7 @@ import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext.global
 
-final class LeaderboardServiceRole[F[+_, +_]: ConcurrentThrowable: TTimer: BIO: BlockingIO](httpApi: HttpApi[F]) extends RoleService[F[Throwable, ?]] {
+final class LeaderboardServiceRole[F[+_, +_]: ConcurrentThrowable: TTimer](httpApi: HttpApi[F]) extends RoleService[F[Throwable, ?]] {
   override def start(roleParameters: RawEntrypointParams, freeArgs: Vector[String]): DIResource.DIResourceBase[F[Throwable, ?], Unit] = {
     for {
       _ <- DIResource.fromCats {
