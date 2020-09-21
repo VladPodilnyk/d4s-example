@@ -7,24 +7,19 @@ import izumi.distage.roles.model.{RoleDescriptor, RoleService}
 import izumi.distage.roles.{RoleAppLauncher, RoleAppMain}
 import izumi.functional.bio.{BIO, BlockingIO}
 import izumi.fundamentals.platform.cli.model.raw.{RawEntrypointParams, RawRoleParams}
-import leaderboard.config.DynamoCfg
-import leaderboard.dynamo.java.DynamoHelper
 import leaderboard.effects.{ConcurrentThrowable, TTimer}
 import leaderboard.http.HttpApi
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 
-final class LeaderboardServiceRole[F[+_, +_]: ConcurrentThrowable: TTimer: BIO: BlockingIO](
-  dynamoClient: DynamoDbClient,
-  cfg: DynamoCfg,
-  httpApi: HttpApi[F]
-) extends RoleService[F[Throwable, ?]] {
+import scala.concurrent.ExecutionContext.global
+
+final class LeaderboardServiceRole[F[+_, +_]: ConcurrentThrowable: TTimer: BIO: BlockingIO](httpApi: HttpApi[F]) extends RoleService[F[Throwable, ?]] {
   override def start(roleParameters: RawEntrypointParams, freeArgs: Vector[String]): DIResource.DIResourceBase[F[Throwable, ?], Unit] = {
     for {
-      _ <- DynamoHelper.tableSetUp(dynamoClient, cfg)
       _ <- DIResource.fromCats {
-        BlazeServerBuilder[F[Throwable, ?]]
+        BlazeServerBuilder
+          .apply[F[Throwable, ?]](global)
           .withHttpApp(httpApi.routes.orNotFound)
           .bindLocal(8080)
           .resource
@@ -33,10 +28,7 @@ final class LeaderboardServiceRole[F[+_, +_]: ConcurrentThrowable: TTimer: BIO: 
   }
 }
 
-object MainProdD4S extends MainBase(Activation(CustomAxis -> CustomAxis.D4S))
-
-object MainProdAmz extends MainBase(Activation(CustomAxis -> CustomAxis.Amz))
-
+object MainProd extends MainBase(Activation(CustomAxis -> CustomAxis.Prod))
 object MainDummy extends MainBase(Activation(CustomAxis -> CustomAxis.Dummy))
 
 object LeaderboardServiceRole extends RoleDescriptor {
@@ -57,7 +49,6 @@ sealed abstract class MainBase(activation: Activation)
 
 object CustomAxis extends Axis {
   override def name: String = "custom-axis"
-  case object Amz extends AxisValueDef
-  case object D4S extends AxisValueDef
+  case object Prod extends AxisValueDef
   case object Dummy extends AxisValueDef
 }

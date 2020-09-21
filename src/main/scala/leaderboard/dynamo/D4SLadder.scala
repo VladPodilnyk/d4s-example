@@ -1,8 +1,8 @@
-package leaderboard.dynamo.d4s
+package leaderboard.dynamo
 
 import d4s.DynamoConnector
 import izumi.functional.bio.BIO
-import leaderboard.dynamo.d4s.LadderTable._
+import LadderTable._
 import leaderboard.models.common.{Score, UserId}
 import leaderboard.models.{QueryFailure, UserWithScore}
 import leaderboard.repo.Ladder

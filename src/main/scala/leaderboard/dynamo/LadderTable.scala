@@ -1,4 +1,4 @@
-package leaderboard.dynamo.d4s
+package leaderboard.dynamo
 
 import java.util.UUID
 

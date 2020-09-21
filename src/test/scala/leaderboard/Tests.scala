@@ -4,7 +4,7 @@ import d4s.DynamoDDLService
 import d4s.test.envs.D4SDockerModule
 import d4s.test.envs.DynamoTestEnv.DDLDown
 import izumi.distage.docker.Docker
-import izumi.distage.docker.modules.DockerContainerModule
+import izumi.distage.docker.modules.DockerSupportModule
 import izumi.distage.model.definition.StandardAxis.Env
 import izumi.distage.model.definition.{Activation, ModuleDef}
 import izumi.distage.model.reflection.DIKey
@@ -25,7 +25,7 @@ abstract class LeaderboardTest extends DistageBIOEnvSpecScalatest[ZIO] with Asse
     moduleOverrides = new ModuleDef {
       make[Rnd[IO]].from[Rnd.Impl[IO]]
 
-      include(new DockerContainerModule[Task] overridenBy new ModuleDef {
+      include(new DockerSupportModule[Task] overridenBy new ModuleDef {
         make[Docker.ClientConfig].fromValue(dockerConf)
       })
       include(D4SDockerModule[IO])
@@ -60,7 +60,7 @@ trait DummyTest extends LeaderboardTest {
 
 trait ProdD4STest extends LeaderboardTest {
   override final def config = super.config.copy(
-    activation = super.config.activation ++ Activation(CustomAxis -> CustomAxis.D4S),
+    activation = super.config.activation ++ Activation(CustomAxis -> CustomAxis.Prod),
   )
 }
 

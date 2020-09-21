@@ -22,10 +22,8 @@ object ZIOPlugin extends PluginDef {
   addImplicit[ContextShiftThrowable[IO]]
   addImplicit[AsyncThrowable[IO]]
   addImplicit[ContextShift[Task]]
-  make[TTimer[IO]].from {
-    implicit zclock: zio.clock.Clock =>
-      TTimer[IO]
-  }
+  make[TTimer[IO]].from(TTimer[IO])
+
   make[ConcurrentThrowable[IO]].from {
     implicit r: Runtime[Any] =>
       implicitly[ConcurrentEffect[IO[Throwable, ?]]]
