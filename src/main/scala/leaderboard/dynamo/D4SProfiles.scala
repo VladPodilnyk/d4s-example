@@ -1,13 +1,13 @@
 package leaderboard.dynamo
 
 import d4s.DynamoConnector
-import izumi.functional.bio.BIO
-import ProfilesTable.UserProfileWithIdStored
+import izumi.functional.bio.BIOBifunctor
+import leaderboard.dynamo.ProfilesTable.UserProfileWithIdStored
 import leaderboard.models.common.UserId
 import leaderboard.models.{QueryFailure, UserProfile}
 import leaderboard.repo.Profiles
 
-final class D4SProfiles[F[+_, +_]: BIO](
+final class D4SProfiles[F[+_, +_]: BIOBifunctor](
   connector: DynamoConnector[F],
   profilesTable: ProfilesTable
 ) extends Profiles[F] {

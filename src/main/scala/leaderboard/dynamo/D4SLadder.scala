@@ -1,13 +1,13 @@
 package leaderboard.dynamo
 
 import d4s.DynamoConnector
-import izumi.functional.bio.BIO
-import LadderTable._
+import izumi.functional.bio.BIOBifunctor
+import leaderboard.dynamo.LadderTable._
 import leaderboard.models.common.{Score, UserId}
 import leaderboard.models.{QueryFailure, UserWithScore}
 import leaderboard.repo.Ladder
 
-final class D4SLadder[F[+_, +_]: BIO](connector: DynamoConnector[F], ladderTable: LadderTable) extends Ladder[F] {
+final class D4SLadder[F[+_, +_]: BIOBifunctor](connector: DynamoConnector[F], ladderTable: LadderTable) extends Ladder[F] {
   import ladderTable._
 
   override def getScores: F[QueryFailure, List[UserWithScore]] = {
