@@ -1,53 +1,36 @@
 package leaderboard
 
-import distage.Activation
 import distage.plugins.PluginConfig
-import izumi.distage.model.definition.{Axis, DIResource}
+import distage.{Activation, Lifecycle, Repo, Scene}
+import izumi.distage.model.definition
+import izumi.distage.model.definition.ModuleDef
+import izumi.distage.roles.RoleAppMain
 import izumi.distage.roles.model.{RoleDescriptor, RoleService}
-import izumi.distage.roles.{RoleAppLauncher, RoleAppMain}
+import izumi.functional.bio.Applicative2
 import izumi.fundamentals.platform.cli.model.raw.{RawEntrypointParams, RawRoleParams}
-import leaderboard.effects.{ConcurrentThrowable, TTimer}
-import leaderboard.http.HttpApi
-import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.syntax.kleisli._
+import logstage.LogIO2
 
-import scala.concurrent.ExecutionContext.global
-
-final class LeaderboardServiceRole[F[+_, +_]: ConcurrentThrowable: TTimer](httpApi: HttpApi[F]) extends RoleService[F[Throwable, ?]] {
-  override def start(roleParameters: RawEntrypointParams, freeArgs: Vector[String]): DIResource.DIResourceBase[F[Throwable, ?], Unit] = {
-    for {
-      _ <- DIResource.fromCats {
-        BlazeServerBuilder
-          .apply[F[Throwable, ?]](global)
-          .withHttpApp(httpApi.routes.orNotFound)
-          .bindLocal(8080)
-          .resource
-      }
-    } yield ()
+final class LeaderboardServiceRole[F[+_, +_]: Applicative2](log: LogIO2[F]) extends RoleService[F[Throwable, ?]] {
+  override def start(roleParameters: RawEntrypointParams, freeArgs: Vector[String]): Lifecycle[F[Throwable, ?], Unit] = {
+    Lifecycle.liftF(log.info("Leaderboard service started!"))
   }
 }
-
-object MainProd extends MainBase(Activation(CustomAxis -> CustomAxis.Prod))
-object MainDummy extends MainBase(Activation(CustomAxis -> CustomAxis.Dummy))
 
 object LeaderboardServiceRole extends RoleDescriptor {
   val id = "leaderboard"
 }
 
-sealed abstract class MainBase(activation: Activation)
-  extends RoleAppMain.Default(
-    launcher = new RoleAppLauncher.LauncherBIO[zio.IO] {
-      override val pluginConfig        = PluginConfig.cached(packagesEnabled = Seq("leaderboard.plugins"))
-      override val requiredActivations = activation
-    }
-  ) {
-  override val requiredRoles = Vector(
-    RawRoleParams(LeaderboardServiceRole.id)
-  )
-}
+object MainProd extends MainBase(Activation(Repo -> Repo.Prod), Vector(RawRoleParams(LeaderboardServiceRole.id)))
+object MainDummy extends MainBase(Activation(Repo -> Repo.Dummy), Vector(RawRoleParams(LeaderboardServiceRole.id)))
 
-object CustomAxis extends Axis {
-  override def name: String = "custom-axis"
-  case object Prod extends AxisValueDef
-  case object Dummy extends AxisValueDef
+sealed abstract class MainBase(activation: Activation, requiredRoles: Vector[RawRoleParams]) extends RoleAppMain.LauncherBIO2[zio.IO] {
+  override def requiredRoles(argv: RoleAppMain.ArgV): Vector[RawRoleParams] = requiredRoles
+
+  override val pluginConfig: PluginConfig = PluginConfig.cached(packagesEnabled = Seq("leaderboard.plugins"))
+
+  protected override def roleAppBootOverrides(argv: RoleAppMain.ArgV): definition.Module = super.roleAppBootOverrides(argv) ++ new ModuleDef {
+    make[Activation].named("default").fromValue(defaultActivation ++ activation)
+  }
+
+  private[this] def defaultActivation = Activation(Scene -> Scene.Provided)
 }

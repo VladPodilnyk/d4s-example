@@ -41,7 +41,7 @@ val Deps = new {
 
 inThisBuild(
   Seq(
-    scalaVersion := "2.13.2",
+    scalaVersion := "2.13.5",
     version := "1.0.0-SNAPSHOT",
   )
 )
@@ -50,18 +50,19 @@ lazy val leaderboard = project
   .in(file("."))
   .settings(
     name := "LeaderBoard",
+    scalacOptions -= "-Xfatal-warnings",
+    scalacOptions += "-Wconf:msg=kind-projector:silent",
+    scalacOptions += "-Wmacros:after",
     scalacOptions in Compile += s"-Xmacro-settings:metricsDir=${(classDirectory in Compile).value}",
     scalacOptions in Test += s"-Xmacro-settings:metricsDir=${(classDirectory in Test).value}",
     scalacOptions in Compile += s"-Xmacro-settings:metricsRole=${(name in Compile).value};${(moduleName in Compile).value}",
     scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Test).value};${(moduleName in Test).value}",
-    scalacOptions --= Seq("-Werror", "-Xfatal-warnings"),
-    //resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     libraryDependencies ++= Seq(
       Deps.distageCore,
       Deps.distageRoles,
       Deps.distageConfig,
       Deps.logstageSlf4j,
-      Deps.distageDocker % Test,
+      Deps.distageDocker,
       Deps.distageTestkit % Test,
       Deps.scalatest % Test,
       Deps.scalacheck % Test,
@@ -74,7 +75,7 @@ lazy val leaderboard = project
       Deps.zioCats,
       Deps.d4s,
       Deps.d4s_circe,
-      Deps.d4s_test % Test,
+      Deps.d4s_test,
     ),
     addCompilerPlugin(Deps.kindProjector),
   )

@@ -1,36 +1,27 @@
 package leaderboard
 
 import d4s.DynamoDDLService
-import d4s.test.envs.D4SDockerModule
 import d4s.test.envs.DynamoTestEnv.DDLDown
-import izumi.distage.docker.Docker
-import izumi.distage.docker.modules.DockerSupportModule
-import izumi.distage.model.definition.StandardAxis.Env
+import izumi.distage.model.definition.StandardAxis.{Repo, Scene}
 import izumi.distage.model.definition.{Activation, ModuleDef}
 import izumi.distage.model.reflection.DIKey
 import izumi.distage.plugins.PluginConfig
 import izumi.distage.testkit.TestConfig
-import izumi.distage.testkit.scalatest.{AssertIO, DistageBIOEnvSpecScalatest}
+import izumi.distage.testkit.scalatest.{AssertIO3, Spec3}
 import leaderboard.Rnd._
 import leaderboard.models.UserProfile
 import leaderboard.models.common.{Score, UserId}
 import leaderboard.repo.{Ladder, Profiles, Ranks}
 import net.playq.aws.tagging.AwsNameSpace
-import zio.{IO, Task, ZIO}
+import zio.{IO, ZIO}
 
-abstract class LeaderboardTest extends DistageBIOEnvSpecScalatest[ZIO] with AssertIO {
-  val envTest = Activation(Env -> Env.Test)
+abstract class LeaderboardTest extends Spec3[ZIO] with AssertIO3[ZIO]  {
   override def config = TestConfig(
     pluginConfig = PluginConfig.cached(packagesEnabled = Seq("leaderboard.plugins")),
     moduleOverrides = new ModuleDef {
       make[Rnd[IO]].from[Rnd.Impl[IO]]
-
-      include(new DockerSupportModule[Task] overridenBy new ModuleDef {
-        make[Docker.ClientConfig].fromValue(dockerConf)
-      })
-      include(D4SDockerModule[IO])
     },
-    activation = super.config.activation ++ envTest,
+    activation = Activation(Scene -> Scene.Managed),
     memoizationRoots = Set(
       DIKey.get[AwsNameSpace],
       DIKey.get[Ladder[IO]],
@@ -40,27 +31,17 @@ abstract class LeaderboardTest extends DistageBIOEnvSpecScalatest[ZIO] with Asse
     ),
     configBaseName = "leaderboard-test",
   )
-
-  def dockerConf: Docker.ClientConfig = Docker.ClientConfig(
-    readTimeoutMs    = 8000,
-    connectTimeoutMs = 3000,
-    allowReuse       = true,
-    useRemote        = false,
-    useRegistry      = false,
-    remote           = None,
-    registry         = None,
-  )
 }
 
 trait DummyTest extends LeaderboardTest {
   override final def config = super.config.copy(
-    activation = super.config.activation ++ Activation(CustomAxis -> CustomAxis.Dummy)
+    activation = super.config.activation ++ Activation(Repo -> Repo.Dummy)
   )
 }
 
 trait ProdD4STest extends LeaderboardTest {
   override final def config = super.config.copy(
-    activation = super.config.activation ++ Activation(CustomAxis -> CustomAxis.Prod)
+    activation = super.config.activation ++ Activation(Repo -> Repo.Prod)
   )
 }
 
