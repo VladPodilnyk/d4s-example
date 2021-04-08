@@ -1,7 +1,7 @@
 package leaderboard.http
 
 import io.circe.syntax._
-import izumi.functional.bio.BIO
+import izumi.functional.bio.{BIO, IO2}
 import izumi.functional.bio.catz._
 import leaderboard.models.UserProfile
 import leaderboard.models.common.{Score, UserId}
@@ -19,7 +19,7 @@ trait HttpApi[F[_, _]] {
 
 object HttpApi {
 
-  final class Impl[F[+_, +_]: BIO](
+  final class Impl[F[+_, +_]: IO2](
     ladder: Ladder[F],
     profiles: Profiles[F],
     ranks: Ranks[F],

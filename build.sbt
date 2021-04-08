@@ -1,14 +1,15 @@
+
 val V = new {
-  val distage         = "1.0.3"
-  val logstage        = "0.10.16"
-  val scalatest       = "3.1.4"
-  val scalacheck      = "1.15.2"
-  val http4s          = "0.21.6"
-  val zio             = "1.0.4"
-  val zioCats         = "2.0.0.0-RC13"
+  val distage         = "1.0.5"
+  val logstage        = distage
+  val scalatest       = "3.2.7"
+  val scalacheck      = "1.15.3"
+  val http4s          = "0.21.21"
+  val zio             = "1.0.5"
+  val zioCats         = "2.4.0.0"
   val kindProjector   = "0.11.3"
-  val circeDerivation = "0.12.0-M7"
-  val d4s             = "1.0.16"
+  val circeDerivation = "0.13.0-M5"
+  val d4s             = "1.0.18"
 }
 
 val Deps = new {
@@ -41,7 +42,7 @@ val Deps = new {
 
 inThisBuild(
   Seq(
-    scalaVersion := "2.13.2",
+    scalaVersion := "2.13.5",
     version := "1.0.0-SNAPSHOT",
   )
 )
@@ -50,18 +51,31 @@ lazy val leaderboard = project
   .in(file("."))
   .settings(
     name := "LeaderBoard",
+    scalacOptions -= "-Xfatal-warnings",
+    scalacOptions += "-Wconf:msg=kind-projector:silent",
+    scalacOptions += "-Wmacros:after",
     scalacOptions in Compile += s"-Xmacro-settings:metricsDir=${(classDirectory in Compile).value}",
     scalacOptions in Test += s"-Xmacro-settings:metricsDir=${(classDirectory in Test).value}",
     scalacOptions in Compile += s"-Xmacro-settings:metricsRole=${(name in Compile).value};${(moduleName in Compile).value}",
     scalacOptions in Test += s"-Xmacro-settings:metricsRole=${(name in Test).value};${(moduleName in Test).value}",
-    scalacOptions --= Seq("-Werror", "-Xfatal-warnings"),
-    //resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+    scalacOptions ++= Seq(
+      s"-Xmacro-settings:product-name=${name.value}",
+      s"-Xmacro-settings:product-version=${version.value}",
+      s"-Xmacro-settings:product-group=${organization.value}",
+      s"-Xmacro-settings:scala-version=${scalaVersion.value}",
+      s"-Xmacro-settings:scala-versions=${crossScalaVersions.value.mkString(":")}",
+      s"-Xmacro-settings:sbt-version=${sbtVersion.value}",
+      s"-Xmacro-settings:git-repo-clean=${git.gitUncommittedChanges.value}",
+      s"-Xmacro-settings:git-branch=${git.gitCurrentBranch.value}",
+      s"-Xmacro-settings:git-described-version=${git.gitDescribedVersion.value.getOrElse("")}",
+      s"-Xmacro-settings:git-head-commit=${git.gitHeadCommit.value.getOrElse("")}",
+    ),
     libraryDependencies ++= Seq(
       Deps.distageCore,
       Deps.distageRoles,
       Deps.distageConfig,
       Deps.logstageSlf4j,
-      Deps.distageDocker % Test,
+      Deps.distageDocker,
       Deps.distageTestkit % Test,
       Deps.scalatest % Test,
       Deps.scalacheck % Test,
@@ -74,7 +88,7 @@ lazy val leaderboard = project
       Deps.zioCats,
       Deps.d4s,
       Deps.d4s_circe,
-      Deps.d4s_test % Test,
+      Deps.d4s_test,
     ),
     addCompilerPlugin(Deps.kindProjector),
   )
