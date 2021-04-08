@@ -1,7 +1,8 @@
 package leaderboard
 
-import d4s.DynamoDDLService
-import d4s.test.envs.DynamoTestEnv.DDLDown
+import d4s.test.envs.D4SDockerModule
+import distage.Mode
+import izumi.distage.docker.modules.DockerSupportModule
 import izumi.distage.model.definition.StandardAxis.{Repo, Scene}
 import izumi.distage.model.definition.{Activation, ModuleDef}
 import izumi.distage.model.reflection.DIKey
@@ -12,22 +13,21 @@ import leaderboard.Rnd._
 import leaderboard.models.UserProfile
 import leaderboard.models.common.{Score, UserId}
 import leaderboard.repo.{Ladder, Profiles, Ranks}
-import net.playq.aws.tagging.AwsNameSpace
-import zio.{IO, ZIO}
+import zio.{IO, Task, ZIO}
 
-abstract class LeaderboardTest extends Spec3[ZIO] with AssertIO3[ZIO]  {
-  override def config = TestConfig(
+abstract class LeaderboardTest extends Spec3[ZIO] with AssertIO3[ZIO] {
+  override def config: TestConfig = TestConfig(
     pluginConfig = PluginConfig.cached(packagesEnabled = Seq("leaderboard.plugins")),
-    moduleOverrides = new ModuleDef {
+    moduleOverrides = super.config.moduleOverrides ++ new ModuleDef {
       make[Rnd[IO]].from[Rnd.Impl[IO]]
+
+      include(DockerSupportModule[Task])
+      include(D4SDockerModule[IO])
     },
     activation = Activation(Scene -> Scene.Managed),
     memoizationRoots = Set(
-      DIKey.get[AwsNameSpace],
       DIKey.get[Ladder[IO]],
       DIKey.get[Profiles[IO]],
-      DIKey.get[DynamoDDLService[IO]],
-      DIKey.get[DDLDown[IO]],
     ),
     configBaseName = "leaderboard-test",
   )
@@ -35,13 +35,13 @@ abstract class LeaderboardTest extends Spec3[ZIO] with AssertIO3[ZIO]  {
 
 trait DummyTest extends LeaderboardTest {
   override final def config = super.config.copy(
-    activation = super.config.activation ++ Activation(Repo -> Repo.Dummy)
+    activation = super.config.activation ++ Activation(Repo -> Repo.Dummy, Mode -> Mode.Test)
   )
 }
 
 trait ProdD4STest extends LeaderboardTest {
   override final def config = super.config.copy(
-    activation = super.config.activation ++ Activation(Repo -> Repo.Prod)
+    activation = super.config.activation ++ Activation(Repo -> Repo.Prod, Mode -> Mode.Test)
   )
 }
 

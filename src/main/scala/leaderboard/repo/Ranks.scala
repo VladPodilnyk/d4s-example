@@ -1,6 +1,6 @@
 package leaderboard.repo
 
-import izumi.functional.bio.BIOMonad
+import izumi.functional.bio.Monad2
 import leaderboard.models.common.UserId
 import leaderboard.models.{QueryFailure, RankedProfile}
 
@@ -8,7 +8,7 @@ trait Ranks[F[_, _]] {
   def getRank(userId: UserId): F[QueryFailure, Option[RankedProfile]]
 }
 object Ranks {
-  final class Impl[F[+_, +_]: BIOMonad](
+  final class Impl[F[+_, +_]: Monad2](
     ladder: Ladder[F],
     profiles: Profiles[F],
   ) extends Ranks[F] {

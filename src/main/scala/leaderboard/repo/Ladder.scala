@@ -1,7 +1,7 @@
 package leaderboard.repo
 
-import izumi.distage.model.definition.DIResource
-import izumi.functional.bio.{BIOMonad, BIOPrimitives, F}
+import izumi.distage.model.definition.Lifecycle
+import izumi.functional.bio.{F, Monad2, Primitives2}
 import leaderboard.models.common.{Score, UserId}
 import leaderboard.models.{QueryFailure, UserWithScore}
 
@@ -12,8 +12,8 @@ trait Ladder[F[_, _]] {
 
 object Ladder {
 
-  final class Dummy[F[+_, +_]: BIOMonad: BIOPrimitives]
-    extends DIResource.LiftF[F[Throwable, ?], Ladder[F]](
+  final class Dummy[F[+_, +_]: Monad2: Primitives2]
+    extends Lifecycle.LiftF[F[Throwable, ?], Ladder[F]](
       for {
         state <- F.mkRef(Map.empty[UserId, Score])
       } yield {
